@@ -15,7 +15,10 @@ import gg.jte.resolve.ResourceCodeResolver;
 import io.javalin.rendering.template.JavalinJte;
 
 // App classes imports
+import hexlet.code.controller.RootController;
+import hexlet.code.controller.UrlsController;
 import hexlet.code.repository.BaseRepository;
+import hexlet.code.util.NamedRoutes;
 
 // Hikari config
 import com.zaxxer.hikari.HikariConfig;
@@ -26,7 +29,7 @@ import io.javalin.Javalin;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class App {
+public final class App {
 
     private static int getPort() {
         String port = System.getenv().getOrDefault("PORT", "7070");
@@ -75,7 +78,11 @@ public class App {
             config.fileRenderer(new JavalinJte(createTemplateEngine()));
         });
 
-        app.get("/", ctx -> ctx.render("index.jte"));
+        app.get(NamedRoutes.rootPath(), RootController::index);
+
+        app.get(NamedRoutes.urlsPath(), UrlsController::index);
+        app.post(NamedRoutes.urlsPath(), UrlsController::create);
+        app.get(NamedRoutes.urlPath("{id}"), UrlsController::show);
 
         return app;
     }
