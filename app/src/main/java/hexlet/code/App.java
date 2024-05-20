@@ -8,6 +8,12 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.stream.Collectors;
 
+// Jte template
+import gg.jte.ContentType;
+import gg.jte.TemplateEngine;
+import gg.jte.resolve.ResourceCodeResolver;
+import io.javalin.rendering.template.JavalinJte;
+
 // App classes imports
 import hexlet.code.repository.BaseRepository;
 
@@ -39,6 +45,12 @@ public class App {
         }
     }
 
+    private static TemplateEngine createTemplateEngine() {
+        ClassLoader classLoader = App.class.getClassLoader();
+        ResourceCodeResolver codeResolver = new ResourceCodeResolver("templates", classLoader);
+        return TemplateEngine.create(codeResolver, ContentType.Html);
+    }
+
     public static void main(String[] args) throws IOException, SQLException {
         var app = getApp();
         app.start(getPort());
@@ -58,9 +70,12 @@ public class App {
         }
         BaseRepository.setDataSource(dataSource);
 
-        var app = Javalin.create(config -> config.bundledPlugins.enableDevLogging());
+        var app = Javalin.create(config -> {
+            config.bundledPlugins.enableDevLogging();
+            config.fileRenderer(new JavalinJte(createTemplateEngine()));
+        });
 
-        app.get("/", ctx -> ctx.result("Hello World"));
+        app.get("/", ctx -> ctx.render("index.jte"));
 
         return app;
     }
