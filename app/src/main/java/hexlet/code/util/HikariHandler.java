@@ -14,7 +14,8 @@ public class HikariHandler {
         String dbUrl = getEnvVar("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;");
         String dbms = dbUrl.split(":")[1];
 
-        log.info(dbUrl, dbms);
+        log.info("DBMS: %s - DB_URL: %s".formatted(dbms, dbUrl));
+
         hikariConfig.setJdbcUrl(dbUrl);
         return switch (dbms) {
             case "h2" -> new HikariDataSource(hikariConfig);
