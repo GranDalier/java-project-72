@@ -36,7 +36,10 @@ public class UrlsController {
             URL urlModel = URI.create(rawName).toURL();
             var name = buildStringFromUrl(urlModel);
 
-            if (UrlsRepository.findByName(name).isPresent()) {
+            boolean isExists = UrlsRepository.getEntities().stream()
+                    .anyMatch(url -> url.getName().equals(name));
+
+            if (isExists) {
                 View.setFlashMessage(ctx, "Страница уже существует", "info");
             } else {
                 var url = new Url(name, createdAt);
