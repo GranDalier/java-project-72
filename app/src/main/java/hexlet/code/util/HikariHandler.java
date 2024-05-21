@@ -25,14 +25,18 @@ public class HikariHandler {
 
         DriverManager.registerDriver(new Driver());
         DriverManager.drivers().forEach(d -> log.info(d.toString()));
-        // log.info(String.valueOf(new Driver().acceptsURL("jdbc:postgresql:/
-        // /dpg-cp68biu3e1ms73a70k3g-a/db72?password=password&user=user")));
 
         String dbUrl = System.getenv()
                 .getOrDefault("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;");
         String dbms = dbUrl.split(":")[1];
 
         hikariConfig.setJdbcUrl(dbUrl);
+
+        if (dbms.equals("postgresql")) {
+            hikariConfig.setUsername(System.getenv("USERNAME"));
+            hikariConfig.setPassword(System.getenv("PASSWORD"));
+        }
+
         var dataSource = new HikariDataSource(hikariConfig);
         var sql = readSqlFile(dbms);
 
