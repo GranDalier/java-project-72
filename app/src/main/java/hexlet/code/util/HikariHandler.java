@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,14 +12,18 @@ import java.util.stream.Collectors;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import org.postgresql.Driver;
+
 import hexlet.code.App;
 import hexlet.code.repository.BaseRepository;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class HikariHandler {
+    private static final Driver PSQL_DRIVER = new Driver();
 
     public static void prepareDatabase() throws IOException, SQLException {
+        DriverManager.registerDriver(PSQL_DRIVER);
         var hikariConfig = new HikariConfig();
 
         String dbUrl = System.getenv()
