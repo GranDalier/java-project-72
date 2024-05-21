@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -14,15 +15,18 @@ import com.zaxxer.hikari.HikariDataSource;
 import hexlet.code.App;
 import hexlet.code.repository.BaseRepository;
 import lombok.extern.slf4j.Slf4j;
-// import org.postgresql.Driver;
+import org.postgresql.Driver;
 
 @Slf4j
 public class HikariHandler {
 
     public static void prepareDatabase() throws IOException, SQLException {
         var hikariConfig = new HikariConfig();
-        // log.warn(String.valueOf(new Driver().acceptsURL("jdbc:
-        // postgresql://dpg-cp68biu3e1ms73a70k3g-a/db72?password=password&user=user")));
+
+        DriverManager.registerDriver(new Driver());
+        DriverManager.drivers().forEach(d -> log.info(d.toString()));
+        // log.info(String.valueOf(new Driver().acceptsURL("jdbc:postgresql:/
+        // /dpg-cp68biu3e1ms73a70k3g-a/db72?password=password&user=user")));
 
         String dbUrl = System.getenv()
                 .getOrDefault("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;");
