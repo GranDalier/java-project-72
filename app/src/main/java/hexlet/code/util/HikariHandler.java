@@ -1,38 +1,58 @@
 package hexlet.code.util;
 
+import java.nio.charset.StandardCharsets;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import hexlet.code.App;
+import hexlet.code.repository.BaseRepository;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class HikariHandler {
 
-    public static HikariDataSource getHikariDataSource() {
+    public static void prepareDatabase() throws IOException, SQLException {
         var hikariConfig = new HikariConfig();
 
-        String dbUrl = getEnvVar("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;");
+        String dbUrl = System.getenv()
+                .getOrDefault("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;");
         String dbms = dbUrl.split(":")[1];
 
-        log.info("DBMS: %s - DB_URL: %s".formatted(dbms, dbUrl));
-
         hikariConfig.setJdbcUrl(dbUrl);
-        return switch (dbms) {
-            case "h2" -> new HikariDataSource(hikariConfig);
-            case "postgresql" -> {
-                hikariConfig.setUsername(getEnvVar("USERNAME"));
-                hikariConfig.setPassword(getEnvVar("PASSWORD"));
-                yield new HikariDataSource(hikariConfig);
-            }
-            default -> throw new IllegalArgumentException("Illegal DBMS name '%s'".formatted(dbms));
+        var dataSource = new HikariDataSource(hikariConfig);
+        var sql = readSqlFile(dbms);
+
+        log.info(sql);
+        try (var connection = dataSource.getConnection();
+             var statement = connection.createStatement()) {
+            statement.execute(sql);
+        }
+        BaseRepository.setDataSource(dataSource);
+    }
+
+    private static String readSqlFile(String dbms) throws IOException {
+        String filePath = switch (dbms) {
+            case "h2" -> "schema.sql";
+            case "postgresql" -> "schemaPSQL.sql";
+            default -> throw new IllegalArgumentException("Unsupported DBMS '%s'".formatted(dbms));
         };
-    }
 
-    private static String getEnvVar(String key, String defaultValue) {
-        return System.getenv().getOrDefault(key, defaultValue);
-    }
+        var inputStream = Optional.ofNullable(App.class.getClassLoader().getResourceAsStream(filePath));
 
-    private static String getEnvVar(String key) {
-        return getEnvVar(key, "");
+        if (inputStream.isEmpty()) {
+            throw new IOException();
+        }
+
+        var streamReader = new InputStreamReader(inputStream.get(), StandardCharsets.UTF_8);
+        try (BufferedReader reader = new BufferedReader(streamReader)) {
+            return reader.lines().collect(Collectors.joining("\n"));
+        }
     }
 }
