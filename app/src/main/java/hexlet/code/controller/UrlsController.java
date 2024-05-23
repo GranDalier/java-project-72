@@ -5,6 +5,7 @@ import static io.javalin.rendering.template.TemplateUtil.model;
 import hexlet.code.dto.urls.UrlsPage;
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.model.Url;
+import hexlet.code.repository.UrlChecksRepository;
 import hexlet.code.repository.UrlsRepository;
 import hexlet.code.util.View;
 import hexlet.code.util.NamedRoutes;
@@ -16,10 +17,8 @@ import io.javalin.http.NotFoundResponse;
 import java.net.URI;
 import java.net.URL;
 import java.net.MalformedURLException;
-import java.sql.Timestamp;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-
+import java.util.Collections;
 
 public class UrlsController {
     public static void index(Context ctx) throws SQLException {
@@ -31,7 +30,6 @@ public class UrlsController {
 
     public static void create(Context ctx) throws SQLException {
         try {
-            var createdAt = Timestamp.valueOf(LocalDateTime.now());
             var rawName = ctx.formParamAsClass("url", String.class).getOrDefault("");
             URL urlModel = URI.create(rawName).toURL();
             var name = buildStringFromUrl(urlModel);
@@ -42,7 +40,7 @@ public class UrlsController {
             if (isExists) {
                 View.setFlashMessage(ctx, "Страница уже существует", "info");
             } else {
-                var url = new Url(name, createdAt);
+                var url = new Url(name);
                 UrlsRepository.save(url);
                 View.setFlashMessage(ctx, "Страница успешно добавлена", "success");
             }
@@ -56,15 +54,18 @@ public class UrlsController {
 
     private static String buildStringFromUrl(URL url) {
         String base = url.getProtocol() + "://" + url.getHost();
-        return url.getPort() == -1 ? base : base + ":" + url.getPort();
+        return base + (url.getPort() == -1 ? "" : ":" + url.getPort());
     }
 
     public static void show(Context ctx) throws SQLException {
         var id = ctx.pathParamAsClass("id", Long.class).get();
         var url = UrlsRepository.find(id)
                 .orElseThrow(() -> new NotFoundResponse("Url not found"));
+        var urlChecks = UrlChecksRepository.findAll(url.getId());
+        Collections.reverse(urlChecks);
 
-        var page = new UrlPage(url);
+        var page = new UrlPage(url, urlChecks);
+        View.getFlashMessage(ctx, page);
         ctx.render("urls/show.jte", model("page", page));
     }
 }
