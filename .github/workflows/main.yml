@@ -34,4 +34,4 @@ jobs:
         with:
           workingDirectory: ${{github.workspace}}/app
           coverageCommand: ./gradlew jacocoTestReport
-          coverageLocations: /build/reports/jacoco/test/jacocoTestReport.xml:jacoco
+          coverageLocations: ${{github.workspace}}/app./build/reports/jacoco/test/jacocoTestReport.xml:jacoco
