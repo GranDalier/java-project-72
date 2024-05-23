@@ -68,71 +68,11 @@ public class AppTest {
         });
     }
 
-//    @Test
-//    public void testBuildCourse() {
-//        JavalinTest.test(app, (server, client) -> {
-//            var response = client.get("/courses/build");
-//            assertThat(response.code()).isEqualTo(200);
-//        });
-//    }
-//
-//    @Test
-//    public void testCreateCourse() {
-//        JavalinTest.test(app, (server, client) -> {
-//            var requestBody = "name=coursename&desdcription=coursedescription";
-//            var response = client.post("/courses", requestBody);
-//            assertThat(response.code()).isEqualTo(200);
-//            assertThat(response.body().string()).contains("coursename");
-//        });
-//    }
-//
-//    @Test
-//    public void testPostsPage() {
-//        JavalinTest.test(app, (server, client) -> {
-//            var response = client.get("/posts");
-//            assertThat(response.code()).isEqualTo(200);
-//        });
-//    }
-//
-//    @Test
-//    public void testCarsPage() {
-//        JavalinTest.test(app, (server, client) -> {
-//            var response = client.get("/cars");
-//            assertThat(response.code()).isEqualTo(200);
-//        });
-//    }
-//
-//    @Test
-//    public void testBuildCarPage() {
-//        JavalinTest.test(app, (server, client) -> {
-//            var response = client.get("/cars/build");
-//            assertThat(response.code()).isEqualTo(200);
-//        });
-//    }
-//
-//    @Test
-//    public void testCarPage() throws SQLException {
-//        var car = new Car("honda", "accord");
-//        CarRepository.save(car);
-//        JavalinTest.test(app, (server, client) -> {
-//            var response = client.get("/cars/" + car.getId());
-//            assertThat(response.code()).isEqualTo(200);
-//        });
-//    }
-//
-//    @Test
-//    void testCarNotFound() throws Exception {
-//        JavalinTest.test(app, (server, client) -> {
-//            var response = client.get("/cars/999999");
-//            assertThat(response.code()).isEqualTo(404);
-//        });
-//    }
-//
-//    @Test
-//    void testUserNotFound() throws Exception {
-//        JavalinTest.test(app, (server, client) -> {
-//            var response = client.get("/users/999999");
-//            assertThat(response.code()).isEqualTo(404);
-//        });
-//    }
+    @Test
+    public void testUrlNotFound() {
+        JavalinTest.test(app, (server, client) -> {
+            var response = client.get(NamedRoutes.urlPath("999"));
+            assertThat(response.code()).isEqualTo(HttpStatus.NOT_FOUND.getCode());
+        });
+    }
 }
