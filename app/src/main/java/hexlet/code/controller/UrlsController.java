@@ -5,6 +5,7 @@ import static io.javalin.rendering.template.TemplateUtil.model;
 import hexlet.code.dto.urls.UrlsPage;
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.model.Url;
+import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.UrlChecksRepository;
 import hexlet.code.repository.UrlsRepository;
 import hexlet.code.util.View;
@@ -13,6 +14,10 @@ import hexlet.code.util.NamedRoutes;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.NotFoundResponse;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
+import kong.unirest.core.UnirestException;
+import org.jsoup.Jsoup;
 
 import java.net.URI;
 import java.net.URL;
@@ -67,5 +72,31 @@ public class UrlsController {
         var page = new UrlPage(url, urlChecks);
         View.getFlashMessage(ctx, page);
         ctx.render("urls/show.jte", model("page", page));
+    }
+
+    public static void checkUrl(Context ctx) throws SQLException {
+        long urlId = ctx.pathParamAsClass("id", Long.class).get();
+
+        String url = UrlsRepository.find(urlId)
+                .orElseThrow(() -> new NotFoundResponse("Url with id = " + urlId + " not found")).getName();
+
+        try {
+            HttpResponse<String> response = Unirest.get(url).asString();
+            var html = Jsoup.parse(response.getBody());
+
+            int statusCode = response.getStatus();
+            String title = html.title().isEmpty() ? null : html.title();
+            var firstH1 = html.select("h1").first();
+            String h1 = firstH1 == null ? null : firstH1.ownText();
+            var descriptionElement = html.select("meta[name=description]").first();
+            String description = descriptionElement == null ? null : descriptionElement.attr("content");
+
+            UrlChecksRepository.save(new UrlCheck(urlId, statusCode, title, h1, description));
+            View.setFlashMessage(ctx, "Страница успешно проверена", "success");
+        } catch (UnirestException e) {
+            View.setFlashMessage(ctx, "Некорректный адрес", "danger");
+        }
+
+        ctx.redirect(NamedRoutes.urlPath(urlId), HttpStatus.FOUND);
     }
 }

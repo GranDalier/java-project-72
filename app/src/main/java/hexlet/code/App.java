@@ -6,7 +6,6 @@ import java.sql.SQLException;
 
 // App classes imports
 import hexlet.code.controller.RootController;
-import hexlet.code.controller.UrlChecksController;
 import hexlet.code.controller.UrlsController;
 import hexlet.code.util.HikariHandler;
 import hexlet.code.util.NamedRoutes;
@@ -54,7 +53,7 @@ public final class App {
         app.post(NamedRoutes.urlsPath(), UrlsController::create);
         app.get(NamedRoutes.urlPath("{id}"), UrlsController::show);
 
-        app.post(NamedRoutes.urlCheckPath("{id}"), UrlChecksController::checkUrl);
+        app.post(NamedRoutes.urlCheckPath("{id}"), UrlsController::checkUrl);
 
         return app;
     }
