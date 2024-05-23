@@ -15,31 +15,26 @@ import com.zaxxer.hikari.HikariDataSource;
 import hexlet.code.App;
 import hexlet.code.repository.BaseRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.postgresql.Driver;
 
 @Slf4j
 public class HikariHandler {
 
     public static void prepareDatabase() throws IOException, SQLException {
         var hikariConfig = new HikariConfig();
-
-        DriverManager.registerDriver(new Driver());
-        DriverManager.drivers().forEach(d -> log.info(d.toString()));
+        DriverManager.registerDriver(new org.postgresql.Driver());
 
         String dbUrl = System.getenv()
                 .getOrDefault("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;");
         String dbms = dbUrl.split(":")[1];
 
         hikariConfig.setJdbcUrl(dbUrl);
-
         if (dbms.equals("postgresql")) {
             hikariConfig.setUsername(System.getenv("USERNAME"));
             hikariConfig.setPassword(System.getenv("PASSWORD"));
         }
-
         var dataSource = new HikariDataSource(hikariConfig);
-        var sql = readSqlFile(dbms);
 
+        var sql = readSqlFile(dbms);
         log.info(sql);
         try (var connection = dataSource.getConnection();
              var statement = connection.createStatement()) {
@@ -56,7 +51,6 @@ public class HikariHandler {
         };
 
         var inputStream = Optional.ofNullable(App.class.getClassLoader().getResourceAsStream(filePath));
-
         if (inputStream.isEmpty()) {
             throw new IOException();
         }
