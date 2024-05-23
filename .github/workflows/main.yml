@@ -24,7 +24,7 @@ jobs:
           
       - name: Build App
         working-directory: ${{github.workspace}}/app
-        run: ./gradlew build jacocoTestReport
+        run: ./gradlew build
 
       - name: Create JacocoTestReport
         working-directory: ${{github.workspace}}/app
