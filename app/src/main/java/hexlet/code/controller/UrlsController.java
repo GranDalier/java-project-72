@@ -24,10 +24,24 @@ import java.net.URL;
 import java.net.MalformedURLException;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.Comparator;
 
 public class UrlsController {
     public static void index(Context ctx) throws SQLException {
         var urls = UrlsRepository.getEntities();
+        var urlChecks = UrlChecksRepository.getEntities();
+
+        urls.forEach(url -> {
+            var lastCheck = urlChecks.stream()
+                    .filter(ch -> ch.getUrlId() == url.getId())
+                    .max(Comparator.comparing(UrlCheck::getId));
+            if (lastCheck.isEmpty()) {
+                return;
+            }
+            url.setStatusCode(lastCheck.get().getStatusCode());
+            url.setLastCheckedAt(lastCheck.get().getCreatedAt());
+        });
+
         var page = new UrlsPage(urls);
         View.getFlashMessage(ctx, page);
         ctx.render("urls/index.jte", model("page", page));

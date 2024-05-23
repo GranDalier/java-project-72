@@ -13,6 +13,9 @@ public final class Url {
     private String name;
     private Timestamp createdAt;
 
+    private int statusCode;
+    private Timestamp lastCheckedAt;
+
     public Url(String name) {
         this.name = name;
     }
