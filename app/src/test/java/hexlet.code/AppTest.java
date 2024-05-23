@@ -58,15 +58,55 @@ public final class AppTest {
     }
 
     @Test
-    public void testUrlsPage() throws IOException, SQLException {
+    public void testUrlsPage() {
+        JavalinTest.test(app, (server, client) -> {
+            var getResponse = client.get(NamedRoutes.urlsPath());
+            assertThat(getResponse.code()).isEqualTo(HttpStatus.OK.getCode());
+        });
+    }
+
+    @Test
+    public void testCreateUrl() {
+        JavalinTest.test(app, (server, client) -> {
+            // Case with correct URL
+            var requestBody1 = "url=https://example.com";
+            var response1 = client.post(NamedRoutes.urlsPath(), requestBody1);
+            String responseBody1 = response1.body() != null ? response1.body().string() : "";
+
+            assertThat(response1.code()).isEqualTo(HttpStatus.OK.getCode());
+            assertThat(responseBody1).contains("https://example.com");
+
+            // Case with incorrect URL
+            var requestBody2 = "url=httxample.com";
+            var response2 = client.post(NamedRoutes.urlsPath(), requestBody2);
+            String responseBody2 = response2.body() != null ? response2.body().string() : "";
+
+            assertThat(response2.code()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.getCode());
+            assertThat(responseBody2).doesNotContain("httxample.com");
+        });
+    }
+
+    @Test
+    public void testUrlPage() throws SQLException {
+        Url url = new Url("https://example.com");
+        UrlsRepository.save(url);
+        JavalinTest.test(app, (server, client) -> {
+            var response = client.get(NamedRoutes.urlPath(url.getId()));
+            assertThat(response.code()).isEqualTo(HttpStatus.OK.getCode());
+        });
+    }
+
+    @Test
+    public void testCheckUrlPage() throws IOException, SQLException {
         String testPagePath = "./src/test/resources/testPage.html";
         String page = Files.readString(Paths.get(testPagePath));
+
         MockResponse mockResponse = new MockResponse().setResponseCode(HttpStatus.OK.getCode()).setBody(page);
         mockServer.enqueue(mockResponse);
-        String urlString = mockServer.url(NamedRoutes.rootPath()).toString();
+        String urlString = mockServer.url("/").toString();
+
         Url url = new Url(urlString);
         UrlsRepository.save(url);
-
         JavalinTest.test(app, (server, client) -> {
             var getResponse = client.get(NamedRoutes.urlsPath());
             assertThat(getResponse.code()).isEqualTo(HttpStatus.OK.getCode());
@@ -79,28 +119,6 @@ public final class AppTest {
             assertThat(lastCheck.getTitle()).isEqualTo("Example title");
             assertThat(lastCheck.getH1()).isEqualTo("Example header 1");
             assertThat(lastCheck.getDescription()).contains("Example description");
-        });
-    }
-
-    @Test
-    public void testCreateUrl() {
-        JavalinTest.test(app, (server, client) -> {
-            var requestBody = "url=https://example.com";
-            var response = client.post(NamedRoutes.urlsPath(), requestBody);
-            assertThat(response.code()).isEqualTo(HttpStatus.OK.getCode());
-
-            String responseBody = response.body() != null ? response.body().string() : "";
-            assertThat(responseBody).contains("https://example.com");
-        });
-    }
-
-    @Test
-    public void testUrlPage() throws SQLException {
-        Url url = new Url("https://example.com");
-        UrlsRepository.save(url);
-        JavalinTest.test(app, (server, client) -> {
-            var response = client.get(NamedRoutes.urlPath(url.getId()));
-            assertThat(response.code()).isEqualTo(HttpStatus.OK.getCode());
         });
     }
 

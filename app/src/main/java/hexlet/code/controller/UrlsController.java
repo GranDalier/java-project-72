@@ -49,11 +49,10 @@ public class UrlsController {
                 UrlsRepository.save(url);
                 View.setFlashMessage(ctx, "Страница успешно добавлена", "success");
             }
-
             ctx.redirect(NamedRoutes.urlsPath(), HttpStatus.FOUND);
         } catch (IllegalArgumentException | MalformedURLException e) {
             View.setFlashMessage(ctx, "Некорректный URL", "danger");
-            ctx.redirect(NamedRoutes.rootPath(), HttpStatus.FOUND);
+            ctx.redirect(NamedRoutes.rootPath(), HttpStatus.UNPROCESSABLE_CONTENT);
         }
     }
 
