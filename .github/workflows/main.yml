@@ -19,8 +19,10 @@ jobs:
           gradle-version: 8.7
           build-root-directory: app
           
-      - name: Build App    
-        run: ${{github.workspace}}/app/gradlew build
+      - name: Build App
+        run: |
+          cd ${{github.workspace}}/app
+          ./gradlew build
           
       - name: Publish code coverage
         uses: paambaati/codeclimate-action@v5.0.0
