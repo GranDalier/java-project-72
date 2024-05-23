@@ -9,11 +9,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.javalin.Javalin;
+import io.javalin.http.HttpStatus;
 import io.javalin.testtools.JavalinTest;
 
 public class AppTest {
 
-    Javalin app;
+    private Javalin app;
 
     @BeforeEach
     public final void setUp() throws IOException, SQLException {
@@ -24,8 +25,10 @@ public class AppTest {
     public void testMainPage() {
         JavalinTest.test(app, (server, client) -> {
             var response = client.get("/");
-            assertThat(response.code()).isEqualTo(200);
-            assertThat(response.body().string()).contains("Анализатор страниц");
+            assertThat(response.code()).isEqualTo(HttpStatus.OK.getCode());
+
+            String responseBody = response.body() != null ? response.body().string() : "";
+            assertThat(responseBody).contains("Анализатор страниц");
         });
     }
 
