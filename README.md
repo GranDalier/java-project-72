@@ -12,3 +12,16 @@
 ![Снимок экрана 2024-05-23 225424](https://github.com/GrandVandal/java-project-72/assets/139870237/49d72659-d33d-420d-9cf9-8c07d9274301)
 ![Снимок экрана 2024-05-23 225227](https://github.com/GrandVandal/java-project-72/assets/139870237/9da856a8-31dc-4a4e-8c3f-e45ea7f90fcc)
 
+## Инструкция по сборке и запуску
+### Сборка
+```.sh
+make build
+```
+### Запуск
+```.sh
+make run
+```
+### Сборка с последующим запуском
+```.sh
+make
+```
