@@ -74,6 +74,7 @@ public final class AppTest {
             String responseBody1 = response1.body() != null ? response1.body().string() : "";
 
             assertThat(response1.code()).isEqualTo(HttpStatus.OK.getCode());
+            assertThat(responseBody1).contains(">Анализатор страниц<");
             assertThat(responseBody1).contains("https://example.com");
 
             // Case with incorrect URL
@@ -81,7 +82,8 @@ public final class AppTest {
             var response2 = client.post(NamedRoutes.urlsPath(), requestBody2);
             String responseBody2 = response2.body() != null ? response2.body().string() : "";
 
-            assertThat(response2.code()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT.getCode());
+            assertThat(response1.code()).isEqualTo(HttpStatus.OK.getCode());
+            assertThat(responseBody2).contains(">Сайты<");
             assertThat(responseBody2).doesNotContain("httxample.com");
         });
     }

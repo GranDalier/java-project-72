@@ -1,6 +1,6 @@
 @import hexlet.code.dto.urls.UrlsPage
-@import hexlet.code.model.Url
 @import hexlet.code.util.NamedRoutes
+@import java.sql.Timestamp
 @import java.time.format.DateTimeFormatter
 
 @param UrlsPage page
@@ -22,22 +22,24 @@ content = @`
                 </tr>
                 </thead>
                 <tbody>
-                @for(Url url : page.getUrls())
+                @for(var lastCheck : page.getLastChecks())
                     <tr>
                         <td>
-                            ${url.getId()}
+                            ${(long) lastCheck.get("url_id")}
                         </td>
                         <td>
-                            <a href="${NamedRoutes.urlPath(url.getId())}">${url.getName()}</a>
+                            <a href="${NamedRoutes.urlPath((long) lastCheck.get("url_id"))}">
+                                ${(String) lastCheck.get("name")}
+                            </a>
                         </td>
                         <td>
-                            @if(url.getLastCheckedAt() != null)
-                                ${formatter.format(url.getLastCheckedAt().toLocalDateTime())}
+                            @if(lastCheck.get("created_at") != null)
+                                ${formatter.format(((Timestamp) lastCheck.get("created_at")).toLocalDateTime())}
                             @endif
                         </td>
                         <td>
-                            @if(url.getStatusCode() != 0)
-                                ${url.getStatusCode()}
+                            @if((int) (lastCheck.get("status_code")) != 0)
+                                ${(int) lastCheck.get("status_code")}
                             @endif
                         </td>
                     </tr>

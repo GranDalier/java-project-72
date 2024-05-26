@@ -9,7 +9,9 @@ import java.sql.Timestamp;
 
 import java.time.LocalDateTime;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 public class UrlChecksRepository extends BaseRepository {
 
@@ -48,12 +50,25 @@ public class UrlChecksRepository extends BaseRepository {
         }
     }
 
-    public static LinkedList<UrlCheck> getEntities() throws SQLException {
-        String sql = "SELECT * FROM url_checks";
+    public static LinkedList<Map<String, Object>> getLastChecks() throws SQLException {
+        String selectPart = "SELECT DISTINCT ON (urls.id) "
+                            + "urls.id AS url_id, urls.name, checks.status_code, checks.created_at FROM ";
+        String joinPart = "urls LEFT JOIN url_checks AS checks ON urls.id = checks.url_id ";
+        String utilPart = "ORDER BY url_id ASC, created_at DESC";
+        String sql = selectPart + joinPart + utilPart;
         try (var conn = getDataSource().getConnection();
              var stmt = conn.prepareStatement(sql)) {
             var resultSet = stmt.executeQuery();
-            return resultSetToList(resultSet);
+            var result = new LinkedList<Map<String, Object>>();
+            while (resultSet.next()) {
+                var lastCheck = new HashMap<String, Object>();
+                lastCheck.put("url_id", resultSet.getLong("url_id"));
+                lastCheck.put("name", resultSet.getString("name"));
+                lastCheck.put("status_code", resultSet.getInt("status_code"));
+                lastCheck.put("created_at", resultSet.getTimestamp("created_at"));
+                result.add(lastCheck);
+            }
+            return result;
         }
     }
 
